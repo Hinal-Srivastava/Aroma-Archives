@@ -5,6 +5,7 @@ import streamlit as st
 import os
 import sqlite3
 import google.generativeai as genai
+import pandas as pd
 
 #Configure API
 genai.configure(api_key=os.getenv("google_api_key"))
@@ -32,12 +33,6 @@ def readSQLQuery(sql,db):
     for row in rows:
         print(row)
     return rows
-
-# # Function to describe the SQL code
-# def getCodeDescription(sql_query, prompt):
-#     model = genai.GenerativeModel("gemini-pro")
-#     response = model.generate_content([prompt[1], sql_query])
-#     return response.text.strip()
 
 
 #Prompt
@@ -67,8 +62,14 @@ prompt = ["""You are an expert at converting english questions to a SQL query.
 
 #Streamlit App
 
-st.set_page_config(page_title="SQL Query Generator")
-st.header("Aroma Archives: A Perfume Sales and Inventory Database")
+st.set_page_config(page_title="Aroma Archives", page_icon="⚱")
+st.header("⚱ Aroma Archives: A Perfume Sales and Inventory Database")
+st.markdown('''
+Welcome to Aroma Archives! 🌸
+Dive into the world of perfumes without needing to know a single line of SQL! 
+            Simply type your question in the textbox below, and watch as the magic unfolds.  
+            Our app will generate the perfect SQL query for you and fetch the results you need. 
+            Effortless, efficient, and enchanting—just like a spritz of your favorite fragrance. Enjoy!🪄🔍''')
 question = st.text_input("Enter your question:", key="input")
 submit = st.button("Generate Results")
 
@@ -76,16 +77,11 @@ submit = st.button("Generate Results")
 if submit:
     response = getGemResponse(question,prompt)
     print(response)
-    data=readSQLQuery(response,"perfumeECommerce.db")
+    data= pd.DataFrame(readSQLQuery(response,"perfumeECommerce.db"))
 
     st.subheader("Generated SQL Query:")
     st.code(response, language="sql")
 
-    # description = getCodeDescription(response, prompt)
-    # st.subheader("SQL Query Description:")
-    # st.write(description)
-
     st.subheader("Results:")
-    for row in data:
-        print(row)
-        st.caption(row)
+    st.write(data)
+
